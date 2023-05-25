@@ -40,7 +40,7 @@ pipeline {
         stage('Docker build and tag') {
             steps {
                 sh 'docker build -t kolevnikolay87/spring-with-maven -f Dockerfile .'
-                sh 'docker tag kolevnikolay87/mynodejsapp kolevnikolay87/spring-with-maven:${BUILD_NUMBER}'
+                sh 'docker tag kolevnikolay87/spring-with-maven kolevnikolay87/spring-with-maven:${BUILD_NUMBER}'
             }
         }
         stage('Docker Push') {
