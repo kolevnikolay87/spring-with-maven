@@ -1,0 +1,57 @@
+pipeline {
+
+    agent {
+        label 'my-openssh-slave'
+    }
+
+    tools {
+        dockerTool 'docker-tool'
+        maven 'maven'
+    }
+    
+    environment {
+        DOCKERHUB_CREDENTIALS = credentials('credentials-dockerhub')
+    }
+
+    stages {
+
+        stage('Clone Repo') {
+            steps {
+                git branch: 'main', url: 'https://github.com/kolevnikolay87/spring-with-maven/'
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'mvn clean install'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+
+        stage('Docker Login') {
+            steps {
+                sh 'docker login -u $DOCKERHUB_CREDENTIALS_USR -p $DOCKERHUB_CREDENTIALS_PSW'
+            }
+        }
+
+        stage('Docker build and tag') {
+            steps {
+                sh 'docker build -t kolevnikolay87/spring-with-maven -f Dockerfile .'
+                sh 'docker tag kolevnikolay87/mynodejsapp kolevnikolay87/spring-with-maven:${BUILD_NUMBER}'
+            }
+        }
+        stage('Docker Push') {
+            steps {
+                sh 'docker push kolevnikolay87/spring-with-maven:${BUILD_NUMBER}'
+            }
+        }
+        stage('Clean') {
+            steps {
+                cleanWs()
+            }
+        }
+    }
+}
